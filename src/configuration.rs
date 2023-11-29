@@ -8,21 +8,26 @@ pub struct Settings {
 
 #[derive(serde::Deserialize)]
 pub struct DatabaseSettings {
-  username: String,
-  password: String,
-  port: u16,
-  host: String,
-  name: String
+  pub username: String,
+  pub password: String,
+  pub port: u16,
+  pub host: String,
+  pub name: String
 }
 
 impl DatabaseSettings {
   pub fn connection_string(&self) -> String {
-    let s = format!(
+    format!(
       "postgres://{}:{}@{}:{}/{}",
       self.username, self.password, self.host, self.port, self.name
-    );
-    print!("{}", s);
-    s
+    )
+  }
+
+  pub fn connection_string_without_db(&self) -> String {
+    format!(
+      "postgres://{}:{}@{}:{}",
+      self.username, self.password, self.host, self.port
+    )
   }
 }
 
