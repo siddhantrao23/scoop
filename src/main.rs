@@ -13,10 +13,7 @@ async fn main() -> Result<(), std::io::Error> {
     let connection_pool = PgPool::connect_lazy(
         &configuration.database.connection_string())
         .expect("Failed to connect to postgres.");
-    sqlx::migrate!("./migrations")
-        .run(&connection_pool)
-        .await
-        .expect("Failed to run migrations.");
+    
     let address = format!("127.0.0.1:{}", configuration.application_port);
     let listener = TcpListener::bind(address)?;
     run(listener, connection_pool)?.await
