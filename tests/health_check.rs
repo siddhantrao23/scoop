@@ -110,6 +110,34 @@ async fn subscribe_returns_400_for_invalid_form_data() {
   }
 }
 
+#[tokio::test]
+async fn subscribe_returns_200_for_empty_form_data() {
+  let app = spawn_app().await;
+  let client = reqwest::Client::new();
+
+  let invalid_data = vec![
+    ("name=&email=ursula_le_guin%40gmail.com", "empty name"),
+    ("name=Ursula&email=", "empty email"),
+    ("name=Ursula&email=definitely-not-an-email", "invalid email"),
+  ];
+  for (body, error_msg) in invalid_data {
+    let response = client
+      .post(&format!("{}/subscriptions", &app.address))
+      .header("Content-Type", "application/x-www-form-urlencoded")
+      .body(body)
+      .send()
+      .await
+      .expect("Failed to send request.");
+
+    assert_eq!(
+      200,
+      response.status().as_u16(),
+      "The API did not return a 200 OK when the payload was {}.",
+      error_msg
+    );
+  }
+}
+
 async fn configure_database(configuration: &DatabaseSettings) -> PgPool {
   let mut connection = PgConnection::connect(
       &configuration.connection_string_without_db()
