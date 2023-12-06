@@ -24,6 +24,8 @@ tracing-bunyan-formatter = "0.3"
 tracing-log = "0.1"
 tracing-actix-web = "0.7" 
 unicode-segmentation = "1.10.1"
+claims = "0.7.1"
+validator = "0.16.1"
 
 [dependencies.sqlx]
 version = "0.6"

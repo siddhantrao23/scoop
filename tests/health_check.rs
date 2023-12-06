@@ -83,7 +83,7 @@ async fn subscribe_returns_200_for_valid_form_data() {
 }
 
 #[tokio::test]
-async fn subscribe_returns_400_for_invalid_form_data() {
+async fn subscribe_returns_400_for_missing_fields() {
   let app = spawn_app().await;
   let client = reqwest::Client::new();
 
@@ -111,7 +111,7 @@ async fn subscribe_returns_400_for_invalid_form_data() {
 }
 
 #[tokio::test]
-async fn subscribe_returns_200_for_empty_form_data() {
+async fn subscribe_returns_400_for_invalid_form_data() {
   let app = spawn_app().await;
   let client = reqwest::Client::new();
 
@@ -130,9 +130,9 @@ async fn subscribe_returns_200_for_empty_form_data() {
       .expect("Failed to send request.");
 
     assert_eq!(
-      200,
+      400,
       response.status().as_u16(),
-      "The API did not return a 200 OK when the payload was {}.",
+      "The API did not return a 400 Bad Request when the payload was {}.",
       error_msg
     );
   }

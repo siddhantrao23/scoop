@@ -1,5 +1,5 @@
 use std::net::TcpListener;
-use ddsqlx::PgPool;
+use sqlx::PgPool;
 
 use sqlx::postgres::PgPoolOptions;
 use zero2prod::telemetry::{init_subscriber, get_subscriber};
