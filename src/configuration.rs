@@ -1,7 +1,10 @@
+use crate::domain::SubscriberEmail;
+
 #[derive(serde::Deserialize)]
 pub struct Settings {
   pub database: DatabaseSettings,
   pub application: ApplicationSettings,
+  pub email_client: EmailSettings,
 }
 
 #[derive(serde::Deserialize)]
@@ -17,6 +20,24 @@ pub struct DatabaseSettings {
   pub port: u16,
   pub host: String,
   pub name: String
+}
+
+#[derive(serde::Deserialize)]
+pub struct EmailSettings {
+  pub sender_email: String,
+  pub base_url: String,
+  pub auth_token: String,
+  pub timeout_ms: u64
+}
+
+impl EmailSettings {
+  pub fn sender(&self) -> Result<SubscriberEmail, String> {
+    SubscriberEmail::parse(self.sender_email.clone())
+  }
+
+  pub fn timeout(&self) -> std::time::Duration {
+    std::time::Duration::from_millis(self.timeout_ms)
+  }
 }
 
 impl DatabaseSettings {
