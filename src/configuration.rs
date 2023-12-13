@@ -1,19 +1,23 @@
 use crate::domain::SubscriberEmail;
+use serde_aux::prelude::*;
 
 #[derive(serde::Deserialize)]
+#[derive(Clone)]
 pub struct Settings {
   pub database: DatabaseSettings,
   pub application: ApplicationSettings,
   pub email_client: EmailSettings,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Clone)]
 pub struct ApplicationSettings {
   pub host: String,
-  pub port: u16
+  #[serde(deserialize_with = "deserialize_number_from_string")]
+  pub port: u16,
 }
 
 #[derive(serde::Deserialize)]
+#[derive(Clone)]
 pub struct DatabaseSettings {
   pub username: String,
   pub password: String,
@@ -23,6 +27,7 @@ pub struct DatabaseSettings {
 }
 
 #[derive(serde::Deserialize)]
+#[derive(Clone)]
 pub struct EmailSettings {
   pub sender_email: String,
   pub base_url: String,

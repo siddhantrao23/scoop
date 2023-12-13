@@ -35,6 +35,7 @@ impl EmailClient {
     http_body: &str,
     text_body: &str,
   ) -> Result<(), reqwest::Error> {
+    println!("{} \n {}", http_body, text_body);
     let url = format!("{}/email", self.base_url);
     let request_body = SendEmailRequest {
       from: self.sender.as_ref(),
@@ -96,6 +97,7 @@ mod tests {
   #[tokio::test]
   async fn send_email_requests_base_url_successfully() {
     let mock_server = MockServer::start().await;
+    print!("{}", mock_server.uri());
     let email_client = email_client(mock_server.uri());
     Mock::given(header_exists("X-Postmark-Server-Token"))
       .and(header("Content-Type", "application/json"))
