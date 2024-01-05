@@ -1,5 +1,4 @@
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
-use sha3::Digest;
 use sqlx::{PgPool, PgConnection, Connection, Executor};
 use uuid::Uuid;
 use wiremock::MockServer;
@@ -28,7 +27,7 @@ pub struct TestApp {
   pub port: u16,
   pub db_pool: PgPool,
   pub email_server: MockServer,
-  test_user: TestUser,
+  pub test_user: TestUser,
 }
 
 pub struct ConfirmationLinks {

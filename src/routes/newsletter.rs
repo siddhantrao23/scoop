@@ -62,6 +62,7 @@ impl ResponseError for PublishError {
   }
 }
 
+#[tracing::instrument(name="Verify password_hash", skip(credentials, pool))]
 async fn validate_credentials(
   credentials: Credentials,
   pool: &PgPool
@@ -90,13 +91,16 @@ async fn validate_credentials(
     .context("Failed to parse hash in PHC string format.")
     .map_err(PublishError::UnexpectedError)?;
 
-  Argon2::default()
-    .verify_password(
-      credentials.password.expose_secret().as_bytes(), 
-      &expected_password_hash
-    )
+  tracing::info_span!("Verify password hash")
+    .in_scope( || {
+      Argon2::default()
+      .verify_password(
+        credentials.password.expose_secret().as_bytes(), 
+        &expected_password_hash
+      )
+    })
     .context("Invalid password.")
-    .map_err(PublishError::UnexpectedError)?;
+    .map_err(PublishError::AuthError)?;
 
   Ok(user_id)
 }
