@@ -1,5 +1,5 @@
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
-use crate::domain::SubscriberEmail;
+use crate::authentication::{Credentials, validate_credentials};
+use crate::{domain::SubscriberEmail, authentication::AuthError};
 use crate::email_client::EmailClient;
 use crate::routes::error_chain_fmt;
 use actix_web::http::{
@@ -10,7 +10,7 @@ use actix_web::{web, HttpRequest, HttpResponse, ResponseError};
 use anyhow::Context;
 use base64::Engine;
 use reqwest::header;
-use secrecy::{Secret, ExposeSecret};
+use secrecy::Secret;
 use sqlx::PgPool;
 
 #[derive(serde::Deserialize)]
@@ -62,11 +62,6 @@ impl ResponseError for PublishError {
   }
 }
 
-struct Credentials {
-  username: String,
-  password: Secret<String>,
-}
-
 fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Error> {
   let header_values = headers
     .get("Authorization")
@@ -103,49 +98,6 @@ fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Erro
     Ok(Credentials { username, password: Secret::new(password) })
 }
 
-#[tracing::instrument(name="Verify password_hash", skip(credentials, pool))]
-async fn validate_credentials(
-  credentials: Credentials,
-  pool: &PgPool
-) -> Result<uuid::Uuid, PublishError> {
-  let row: Option<_> = sqlx::query!(
-    r#"
-    SELECT user_id, password_hash
-    FROM users
-    WHERE username = $1
-    "#,
-    credentials.username,
-  )
-  .fetch_optional(pool)
-  .await
-  .context("Failed to perform a query to retrieve stored user.")
-  .map_err(PublishError::UnexpectedError)?;
-
-  let (user_id, expected_password_hash) = match row {
-    Some(row) => (row.user_id, row.password_hash),
-    None => {
-      return Err(PublishError::AuthError(anyhow::anyhow!("Unknown username")));
-    }
-  };
-
-  let expected_password_hash = PasswordHash::new(&expected_password_hash)
-    .context("Failed to parse hash in PHC string format.")
-    .map_err(PublishError::UnexpectedError)?;
-
-  tracing::info_span!("Verify password hash")
-    .in_scope( || {
-      Argon2::default()
-      .verify_password(
-        credentials.password.expose_secret().as_bytes(), 
-        &expected_password_hash
-      )
-    })
-    .context("Invalid password.")
-    .map_err(PublishError::AuthError)?;
-
-  Ok(user_id)
-}
-
 #[tracing::instrument(
   name = "Publishing a newsletter issue",
   skip(body, pool, email_client, request),
@@ -164,7 +116,12 @@ pub async fn publish_newsletter(
     "username", 
     &tracing::field::display(&credentials.username)
   );
-  let user_id = validate_credentials(credentials, &pool).await?;
+  let user_id = validate_credentials(credentials, &pool)
+    .await
+    .map_err(|e| match e {
+      AuthError::InvalidCredentials(_) => PublishError::AuthError(e.into()),
+      AuthError::UnexpectedError(_) => PublishError::UnexpectedError(e.into()),
+    })?;
   tracing::Span::current().record("user_id", &tracing::field::display(user_id));
   let subscribers = get_confirmed_subscribers(&pool).await?;
   for subscriber in subscribers {
