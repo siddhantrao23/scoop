@@ -1,4 +1,5 @@
 use reqwest::Client;
+use secrecy::{Secret, ExposeSecret};
 
 use crate::domain::SubscriberEmail;
 
@@ -6,14 +7,14 @@ pub struct EmailClient {
   sender: SubscriberEmail,
   client: Client,
   base_url: String,
-  auth_token: String,
+  auth_token: Secret<String>,
 }
 
 impl EmailClient {
   pub fn new(
     sender: SubscriberEmail,
     base_url: String,
-    auth_token: String,
+    auth_token: Secret<String>,
     timeout: std::time::Duration,
   ) -> Self {
     let client = Client::builder()
@@ -47,7 +48,7 @@ impl EmailClient {
     let _builder = self
       .client
       .post(&url)
-      .header("X-Postmark-Server-Token", self.auth_token.clone())
+      .header("X-Postmark-Server-Token", self.auth_token.expose_secret().clone())
       .json(&request_body)
       .send()
       .await?
@@ -68,8 +69,9 @@ struct SendEmailRequest<'a> {
 #[cfg(test)]
 mod tests {
   use claims::{assert_ok, assert_err};
-  use wiremock::{MockServer, Mock, matchers::{header_exists, header, path, method, any}, ResponseTemplate};
-  use fake::{faker::{internet::en::SafeEmail, lorem::en::{Sentence, Paragraph}}, Fake};
+  use secrecy::Secret;
+use wiremock::{MockServer, Mock, matchers::{header_exists, header, path, method, any}, ResponseTemplate};
+  use fake::{faker::{internet::en::SafeEmail, lorem::en::{Sentence, Paragraph}}, Fake, Faker};
   use crate::{domain::SubscriberEmail, email_client::EmailClient};
 
   fn subject() -> String {
@@ -88,7 +90,7 @@ mod tests {
     EmailClient::new(
       email(),
       base_url, 
-      Sentence(1 .. 2).fake(), 
+      Secret::new(Faker.fake()),
       std::time::Duration::from_millis(200)
     )
   }

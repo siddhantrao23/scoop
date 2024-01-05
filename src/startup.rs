@@ -2,6 +2,7 @@ use std::net::TcpListener;
 
 use actix_web::{HttpServer, web, App};
 use actix_web::dev::Server;
+use secrecy::ExposeSecret;
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use tracing_actix_web::TracingLogger;
@@ -57,7 +58,7 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
   PgPoolOptions::new()
     .acquire_timeout(std::time::Duration::from_secs(2))
     .connect_lazy(
-        &configuration.connection_string()
+        &configuration.connection_string().expose_secret()
     )
     .expect("Failed to connect to postgres.")
 }
