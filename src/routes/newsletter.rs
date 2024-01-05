@@ -62,6 +62,47 @@ impl ResponseError for PublishError {
   }
 }
 
+struct Credentials {
+  username: String,
+  password: Secret<String>,
+}
+
+fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Error> {
+  let header_values = headers
+    .get("Authorization")
+    .context("Authorization header was missing.")?
+    .to_str()
+    .context("The Authorization header was not of valid UTF8 format.")?;
+
+  let base64encoded_segment = header_values
+    .strip_prefix("Basic ")
+    .context("The authorization scheme was not 'Basic'.")?;
+
+  let decoded_bytes = base64::engine::general_purpose::STANDARD
+    .decode(base64encoded_segment)
+    .context("Could not base-64 decode the 'Basic' credentials.")?;
+
+  let decoded_credentials = String::from_utf8(decoded_bytes)
+    .context("The decoded credential string is not valid UTF8.")?;
+
+  let mut credentials = decoded_credentials.splitn(2, ':');
+  let username = credentials
+    .next()
+    .ok_or_else(|| {
+      anyhow::anyhow!("A username must be provided in 'Basic' auth")
+    })?
+    .to_string();
+
+  let password = credentials
+    .next()
+    .ok_or_else(|| {
+      anyhow::anyhow!("A password must be provided in 'Basic' auth")
+    })?
+    .to_string();
+    
+    Ok(Credentials { username, password: Secret::new(password) })
+}
+
 #[tracing::instrument(name="Verify password_hash", skip(credentials, pool))]
 async fn validate_credentials(
   credentials: Credentials,
@@ -175,43 +216,3 @@ async fn get_confirmed_subscribers(
   Ok(confirmed_subscribers)
 }
 
-struct Credentials {
-  username: String,
-  password: Secret<String>,
-}
-
-fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Error> {
-  let header_values = headers
-    .get("Authorization")
-    .context("Authorization header was missing.")?
-    .to_str()
-    .context("The Authorization header was not of valid UTF8 format.")?;
-
-  let base64encoded_segment = header_values
-    .strip_prefix("Basic ")
-    .context("The authorization scheme was not 'Basic'.")?;
-
-  let decoded_bytes = base64::engine::general_purpose::STANDARD
-    .decode(base64encoded_segment)
-    .context("Could not base-64 decode the 'Basic' credentials.")?;
-
-  let decoded_credentials = String::from_utf8(decoded_bytes)
-    .context("The decoded credential string is not valid UTF8.")?;
-
-  let mut credentials = decoded_credentials.splitn(2, ':');
-  let username = credentials
-    .next()
-    .ok_or_else(|| {
-      anyhow::anyhow!("A username must be provided in 'Basic' auth")
-    })?
-    .to_string();
-
-  let password = credentials
-    .next()
-    .ok_or_else(|| {
-      anyhow::anyhow!("A password must be provided in 'Basic' auth")
-    })?
-    .to_string();
-    
-    Ok(Credentials { username, password: Secret::new(password) })
-}

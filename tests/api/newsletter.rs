@@ -3,6 +3,39 @@ use wiremock::{Mock, matchers::{any, method, path}, ResponseTemplate};
 
 use crate::helpers::{spawn_app, TestApp, ConfirmationLinks};
 
+async fn create_uncomfirmed_subscriber(app: &TestApp) -> ConfirmationLinks {
+  let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
+  let _mock_guard = Mock::given(path("/email"))
+    .and(method("POST"))
+    .respond_with(ResponseTemplate::new(200))
+    .named("Create unconfirmed subscriber")
+    .expect(1)
+    .mount_as_scoped(&app.email_server)
+    .await;
+  app.post_subscriptions(body.into())
+    .await
+    .error_for_status()
+    .unwrap();
+
+  let email_request = &app.email_server
+    .received_requests()
+    .await
+    .unwrap()
+    .pop()
+    .unwrap();
+
+  app.get_confirmation_links(email_request)
+}
+
+async fn create_comfirmed_subscriber(app: &TestApp) {
+  let confirmation_links = create_uncomfirmed_subscriber(app).await;
+  reqwest::get(confirmation_links.html)
+    .await
+    .unwrap()
+    .error_for_status()
+    .unwrap();
+}
+
 #[tokio::test]
 async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
   let app = spawn_app().await;
@@ -141,7 +174,7 @@ async fn invalid_password_is_rejected() {
   let username = &app.test_user.username;
   let password = Uuid::new_v4().to_string();
   assert_ne!(password, app.test_user.password);
-  
+
   let response = reqwest::Client::new()
     .post(&format!("{}/newsletters", &app.address))
     .basic_auth(username, Some(password))
@@ -161,37 +194,4 @@ async fn invalid_password_is_rejected() {
     r#"Basic realm="publish""#,
     response.headers()["WWW-Authenticate"]
   );
-}
-
-async fn create_uncomfirmed_subscriber(app: &TestApp) -> ConfirmationLinks {
-  let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
-  let _mock_guard = Mock::given(path("/email"))
-    .and(method("POST"))
-    .respond_with(ResponseTemplate::new(200))
-    .named("Create unconfirmed subscriber")
-    .expect(1)
-    .mount_as_scoped(&app.email_server)
-    .await;
-  app.post_subscriptions(body.into())
-    .await
-    .error_for_status()
-    .unwrap();
-
-  let email_request = &app.email_server
-    .received_requests()
-    .await
-    .unwrap()
-    .pop()
-    .unwrap();
-
-  app.get_confirmation_links(email_request)
-}
-
-async fn create_comfirmed_subscriber(app: &TestApp) {
-  let confirmation_links = create_uncomfirmed_subscriber(app).await;
-  reqwest::get(confirmation_links.html)
-    .await
-    .unwrap()
-    .error_for_status()
-    .unwrap();
 }
