@@ -1,5 +1,4 @@
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
-use reqwest::Response;
 use secrecy::ExposeSecret;
 use sqlx::{PgPool, PgConnection, Connection, Executor};
 use uuid::Uuid;
@@ -129,6 +128,34 @@ impl TestApp {
       .await
       .unwrap()
   }
+
+  pub async fn get_change_password(&self) -> reqwest::Response {
+    self.api_client
+      .get(format!("{}/admin/password", self.address))
+      .send()
+      .await
+      .expect("Failed to execute request.")
+  }
+
+  pub async fn post_change_password<Body>(&self, body: &Body) -> reqwest::Response
+    where
+      Body: serde::Serialize, 
+  {
+    self.api_client
+      .post(format!("{}/admin/password", self.address))
+      .form(body)
+      .send()
+      .await
+      .expect("Failed to execute request.")
+  }
+
+  pub async fn get_change_password_html(&self) -> String {
+    self.get_change_password()
+      .await
+      .text()
+      .await
+      .unwrap()
+  }
 }
 
 pub struct TestUser {
@@ -227,7 +254,7 @@ async fn configure_database(configuration: &DatabaseSettings) -> PgPool {
   connection_pool
 }
 
-pub fn assert_is_redirect_to(response: &Response, location: &str) {
+pub fn assert_is_redirect_to(response: &reqwest::Response, location: &str) {
   assert_eq!(response.status().as_u16(), 303);
   assert_eq!(response.headers().get("Location").unwrap(), location);
 }

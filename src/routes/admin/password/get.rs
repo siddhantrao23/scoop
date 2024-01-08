@@ -1,14 +1,33 @@
-use actix_web::{HttpResponse, http::header::ContentType};
+use crate::session_state::TypedSession;
+use crate::utils::{e500, see_other};
+use actix_web::http::header::ContentType;
+use actix_web::HttpResponse;
+use actix_web_flash_messages::IncomingFlashMessages;
+use std::fmt::Write;
 
-pub async fn change_password_form() -> Result<HttpResponse, actix_web::Error> {
-  Ok(HttpResponse::Ok().content_type(ContentType::html()).body(
-    r#"<!DOCTYPE html>
+pub async fn change_password_form(
+  session: TypedSession,
+  flash_message: IncomingFlashMessages
+) -> Result<HttpResponse, actix_web::Error> {
+  if session.get_user_id().map_err(e500)?.is_none() {
+    return Ok(see_other("/login"));
+  }
+
+  let mut msg_html = String::new();
+  for m in flash_message.iter() {
+    writeln!(msg_html, "<p><i>{}</i></p>", m.content()).unwrap();
+  }
+  Ok(HttpResponse::Ok()
+    .content_type(ContentType::html())
+    .body(format!(
+      r#"<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>Change Password</title>
 </head>
 <body>
+  {msg_html}
   <form action="/admin/password" method="post">
     <label>Current password
     <input
@@ -39,5 +58,5 @@ pub async fn change_password_form() -> Result<HttpResponse, actix_web::Error> {
   <p><a href="/admin/dashboard">&lt;- Back</a></p>
 </body>
 </html>"#,
-  ))
+  )))
 }

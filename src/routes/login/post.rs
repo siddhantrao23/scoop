@@ -4,7 +4,7 @@ use reqwest::{header::LOCATION, StatusCode};
 use secrecy::Secret;
 use sqlx::PgPool;
 
-use crate::{authentication::{Credentials, validate_credentials, AuthError}, routes::error_chain_fmt, session_state::TypedSession};
+use crate::{authentication::{Credentials, validate_credentials, AuthError}, routes::error_chain_fmt, session_state::TypedSession, utils::see_other};
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -72,8 +72,6 @@ pub async fn login(
 
 fn login_redirect(e: LoginError) -> InternalError<LoginError> {
   FlashMessage::error(e.to_string()).send();
-  let response = HttpResponse::SeeOther()
-    .insert_header((LOCATION, "/login"))
-    .finish();
+  let response = see_other("/login");
   InternalError::from_response(e, response)
 }
