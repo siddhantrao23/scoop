@@ -1,5 +1,5 @@
 use anyhow::Context;
-use argon2::{PasswordHash, Argon2, PasswordVerifier};
+use argon2::{PasswordHash, Argon2, PasswordVerifier, password_hash::SaltString, Algorithm, Version, Params, PasswordHasher};
 use secrecy::{Secret, ExposeSecret};
 use sqlx::PgPool;
 
@@ -57,4 +57,44 @@ pub async fn validate_credentials(
     .map_err(AuthError::InvalidCredentials)?;
 
   Ok(user_id)
+}
+
+pub async fn change_password(
+  user_id: uuid::Uuid,
+  password: Secret<String>,
+  pool: &PgPool
+) -> Result<(), anyhow::Error> {
+  let password_hash = tracing::info_span!("Change password")
+    .in_scope( || {
+      compute_password_hash(password)
+  })
+  .context("Failed to hash password")
+  .map_err(AuthError::UnexpectedError)?;
+
+  sqlx::query!(
+    r#"
+    UPDATE users
+    SET password_hash = $1
+    WHERE user_id = $2
+    "#,
+    password_hash.expose_secret(),
+    user_id
+  )
+  .execute(pool)
+  .await
+  .context("Failed to change user's password in the database.")?;
+
+  Ok(())
+}
+
+fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>, anyhow::Error> {
+  let salt = SaltString::generate(&mut rand::thread_rng());
+  let password_hash = Argon2::new(
+        Algorithm::Argon2id,
+        Version::V0x13,
+        Params::new(15000, 2, 1, None).unwrap(),
+    )
+    .hash_password(password.expose_secret().as_bytes(), &salt)?
+    .to_string();
+    Ok(Secret::new(password_hash))
 }

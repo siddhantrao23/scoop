@@ -1,9 +1,11 @@
+use crate::authentication::{validate_credentials, AuthError, Credentials};
+use crate::routes::admin::dashboard::get_username;
+use crate::session_state::TypedSession;
+use crate::utils::{e500, see_other};
 use actix_web::{web, HttpResponse};
 use actix_web_flash_messages::FlashMessage;
-use secrecy::{Secret, ExposeSecret};
+use secrecy::{ExposeSecret, Secret};
 use sqlx::PgPool;
-
-use crate::{utils::{see_other, e500}, session_state::TypedSession, routes::admin::dashboard::get_username, authentication::{Credentials, validate_credentials, AuthError}};
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -45,5 +47,19 @@ pub async fn change_password(
       AuthError::UnexpectedError(_) => Err(e500(e).into()), 
     }
   }
-  todo!()
+
+  let password_length = form.0.new_password.expose_secret().len();
+  if password_length < 12 {
+    FlashMessage::error("The password should be at least 12 characters long.").send();
+    return Ok(see_other("/admin/password"));
+  } else if password_length > 128 {
+    FlashMessage::error("The password should be at most 128 characters long.").send();
+    return Ok(see_other("/admin/password"));
+  }
+
+  crate::authentication::change_password(user_id, form.0.new_password, &pool)
+    .await
+    .map_err(e500)?;
+  FlashMessage::info("Your password has been changed.").send();
+  Ok(see_other("/admin/password"))
 }

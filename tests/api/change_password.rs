@@ -80,8 +80,72 @@ async fn current_passwords_must_be_valid() {
   assert_is_redirect_to(&response, "/admin/password");
   
   let html_page = app.get_change_password_html().await;
-  println!("{}", html_page);
   assert!(html_page.contains(
     "<p><i>The current password is incorrect.</i></p>"
   ));
+}
+
+#[tokio::test]
+async fn new_password_must_be_strong() {
+  let app = spawn_app().await;
+
+  let new_password = "weak";
+
+  app.post_login(&json!({
+    "username": &app.test_user.username,
+    "password": &app.test_user.password
+  }))
+  .await;
+
+  let response = app.post_change_password(
+    &json!({
+      "current_password": &app.test_user.password,
+      "new_password": &new_password,
+      "new_password_check": &new_password,
+  }))
+  .await;
+
+  assert_is_redirect_to(&response, "/admin/password");
+  
+  let html_page = app.get_change_password_html().await;
+  assert!(html_page.contains(
+    "<p><i>The password should be at least 12 characters long.</i></p>"
+  ));
+}
+
+#[tokio::test]
+async fn changing_password_is_successful() {
+  let app = spawn_app().await;
+  
+  let new_password = uuid::Uuid::new_v4().to_string();
+
+  app.post_login(&json!({
+    "username": &app.test_user.username,
+    "password": &app.test_user.password
+  }))
+  .await;
+
+  let response = app.post_change_password(
+    &json!({
+      "current_password": &app.test_user.password,
+      "new_password": &new_password,
+      "new_password_check": &new_password,
+  }))
+  .await;
+  assert_is_redirect_to(&response, "/admin/password");
+  let html_page = app.get_change_password_html().await;
+  assert!(html_page.contains("<p><i>Your password has been changed.</i></p>"));
+
+  let response = app.post_logout().await;
+  assert_is_redirect_to(&response, "/login");  
+  let html_page = app.get_login_html().await;
+  assert!(html_page.contains("<p><i>You have successfully logged out.</i></p>"));
+
+
+  let response = app.post_login(&json!({
+    "username": &app.test_user.username,
+    "password": &new_password
+  }))
+  .await;
+  assert_is_redirect_to(&response, "/admin/dashboard");
 }

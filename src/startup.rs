@@ -14,7 +14,7 @@ use sqlx::postgres::PgPoolOptions;
 use tracing_actix_web::TracingLogger;
 
 use crate::configuration::{Settings, DatabaseSettings};
-use crate::routes::{publish_newsletter, home, login_form, login, admin_dashboard, change_password_form, change_password};
+use crate::routes::{publish_newsletter, home, login_form, login, admin_dashboard, change_password_form, change_password, log_out};
 use crate::email_client::EmailClient;
 use crate::routes::{health_check, subscribe, confirm};
 
@@ -107,6 +107,7 @@ async fn run(
           .route("/admin/dashboard", web::get().to(admin_dashboard))
           .route("/admin/password", web::get().to(change_password_form))
           .route("/admin/password", web::post().to(change_password))
+          .route("/admin/logout", web::post().to(log_out))
           .app_data(db_pool.clone())
           .app_data(email_client.clone())
           .app_data(base_url.clone())
