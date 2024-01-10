@@ -1,5 +1,6 @@
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use secrecy::ExposeSecret;
+use serde_json::json;
 use sqlx::{PgPool, PgConnection, Connection, Executor};
 use uuid::Uuid;
 use wiremock::MockServer;
@@ -77,17 +78,32 @@ impl TestApp {
     }
   }
 
-  pub async fn post_newsletter(
-    &self,
-    body: serde_json::Value
-  ) -> reqwest::Response {
+  pub async fn post_submit_newsletter<Body>(&self, body: Body) -> reqwest::Response 
+  where 
+    Body: serde::Serialize,
+  {
     self.api_client
-      .post(format!("{}/newsletters", &self.address))
-      .basic_auth(&self.test_user.username, Some(&self.test_user.password))
-      .json(&body)
+      .post(format!("{}/admin/newsletters", &self.address))
+      .form(&body)
       .send()
       .await
       .expect("Failed to execute request.")
+  }
+
+  pub async fn get_publish_newsletter(&self) -> reqwest::Response {
+    self.api_client
+      .get(format!("{}/admin/newsletters", &self.address))
+      .send()
+      .await
+      .expect("Failed to send request")
+  }
+
+  pub async fn get_publish_newsletter_html(&self) -> String {
+    self.get_publish_newsletter()
+      .await
+      .text()
+      .await
+      .unwrap()
   }
 
   pub async fn post_login<Body>(&self, body: &Body) -> reqwest::Response
@@ -140,14 +156,14 @@ impl TestApp {
   pub async fn post_change_password<Body>(&self, body: &Body) -> reqwest::Response
     where
       Body: serde::Serialize, 
-  {
-    self.api_client
-      .post(format!("{}/admin/password", self.address))
-      .form(body)
-      .send()
-      .await
-      .expect("Failed to execute request.")
-  }
+    {
+      self.api_client
+        .post(format!("{}/admin/password", self.address))
+        .form(body)
+        .send()
+        .await
+        .expect("Failed to execute request.")
+    }
 
   pub async fn get_change_password_html(&self) -> String {
     self.get_change_password()
@@ -199,6 +215,14 @@ impl TestUser {
     .execute(pool)
     .await
     .expect("Failed to store test user.");
+  }
+
+  pub async fn login(&self, app: &TestApp) -> reqwest::Response {
+    app.post_login(&json!({
+      "username": &self.username,
+      "password": &self.password,
+    }))
+    .await
   }
 }
 

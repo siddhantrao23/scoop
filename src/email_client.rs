@@ -33,16 +33,16 @@ impl EmailClient {
     &self,
     receiver: &SubscriberEmail,
     subject: &str,
-    html_body: &str,
     text_body: &str,
+    html_body: &str,
   ) -> Result<(), reqwest::Error> {
     let url = format!("{}/email", self.base_url);
     let request_body = SendEmailRequest {
       from: self.sender.as_ref(),
       to: receiver.as_ref(),
       subject,
-      html_body,
       text_body,
+      html_body,
     };
 
     let _builder = self
@@ -62,8 +62,8 @@ struct SendEmailRequest<'a> {
   from: &'a str,
   to: &'a str,
   subject: &'a str,
-  html_body: &'a str,
   text_body: &'a str,
+  html_body: &'a str,
 }
 
 #[cfg(test)]

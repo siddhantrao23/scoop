@@ -1,5 +1,3 @@
-use serde_json::json;
-
 use crate::helpers::{spawn_app, assert_is_redirect_to};
 
 #[tokio::test]
@@ -15,12 +13,7 @@ async fn only_logged_in_users_can_access_dashboard() {
 async fn logout_clears_session_state() {
   let app = spawn_app().await;
 
-  let login_body = json!({
-    "username": &app.test_user.username,
-    "password": &app.test_user.password,
-  });
-
-  let response = app.post_login(&login_body).await;
+  let response = app.test_user.login(&app).await;
   assert_is_redirect_to(&response, "/admin/dashboard");
 
   let html_body = app.get_admin_dashboard_html().await;
