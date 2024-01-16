@@ -1,4 +1,4 @@
-use crate::domain::SubscriberEmail;
+use crate::{domain::SubscriberEmail, email_client::EmailClient};
 use secrecy::{Secret, ExposeSecret};
 use serde_aux::prelude::*;
 
@@ -7,7 +7,7 @@ use serde_aux::prelude::*;
 pub struct Settings {
   pub database: DatabaseSettings,
   pub application: ApplicationSettings,
-  pub email_client: EmailSettings,
+  pub email_client: EmailClientSettings,
   pub redis_uri: Secret<String>,
 }
 
@@ -32,14 +32,20 @@ pub struct DatabaseSettings {
 
 #[derive(serde::Deserialize)]
 #[derive(Clone)]
-pub struct EmailSettings {
-  pub sender_email: String,
+pub struct EmailClientSettings {
+  sender_email: String,
   pub base_url: String,
   pub auth_token: Secret<String>,
-  pub timeout_ms: u64
+  timeout_ms: u64
 }
 
-impl EmailSettings {
+impl EmailClientSettings {
+  pub fn client(self) -> EmailClient {
+    let sender_email = self.sender().expect("Invalid sender email.");
+    let timeout = self.timeout();
+    EmailClient::new(sender_email, self.base_url, self.auth_token, timeout)
+  }
+
   pub fn sender(&self) -> Result<SubscriberEmail, String> {
     SubscriberEmail::parse(self.sender_email.clone())
   }

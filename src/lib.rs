@@ -7,4 +7,5 @@ pub mod telemetry;
 pub mod authentication;
 pub mod session_state;
 pub mod utils;
+pub mod issue_delivery_workers;
 mod idempotency;

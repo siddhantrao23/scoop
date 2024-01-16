@@ -7,7 +7,7 @@ use wiremock::MockServer;
 use zero2prod::{
   configuration::{get_configuration, DatabaseSettings},
   telemetry::{get_subscriber, init_subscriber},
-  startup::{get_connection_pool, Application},
+  startup::{get_connection_pool, Application}, email_client::EmailClient, issue_delivery_workers::{ExecutionOutcome, try_execute_task},
 };
 use once_cell::sync::Lazy;
 
@@ -31,6 +31,7 @@ pub struct TestApp {
   pub email_server: MockServer,
   pub test_user: TestUser,
   pub api_client: reqwest::Client,
+  pub email_client: EmailClient
 }
 
 pub struct ConfirmationLinks {
@@ -39,6 +40,18 @@ pub struct ConfirmationLinks {
 }
 
 impl TestApp {
+  pub async fn displatch_all_pending_emails(&self) {
+    loop {
+      if let ExecutionOutcome::EmptyQueue =
+        try_execute_task(&self.db_pool, &self.email_client)
+          .await
+          .unwrap()
+          {
+            break;
+          }
+    }
+  }
+
   pub async fn post_subscriptions(&self, body: String) -> reqwest::Response {
     self.api_client
       .post(&format!("{}/subscriptions", &self.address))
@@ -259,6 +272,7 @@ pub async fn spawn_app() -> TestApp {
     email_server,
     test_user: TestUser::generate(),
     api_client,
+    email_client: configuration.email_client.client()
   };
   test_app.test_user.store(&test_app.db_pool).await;
   test_app
