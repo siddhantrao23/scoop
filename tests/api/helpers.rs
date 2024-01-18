@@ -62,6 +62,17 @@ impl TestApp {
       .expect("Failed to send request.")
   }
 
+  pub async fn get_subscription_html(&self) -> String {
+    self.api_client
+      .get(&format!("{}/subscriptions", &self.address))
+      .send()
+      .await
+      .expect("Failed to execute request.")
+      .text()
+      .await
+      .unwrap()
+  }
+
   pub fn get_confirmation_links(
     &self,
     email_request: &wiremock::Request
@@ -82,8 +93,8 @@ impl TestApp {
       confirmation_link
     };
     
-    let html = get_link(&body["html_body"].as_str().unwrap());
-    let plain_text = get_link(&body["text_body"].as_str().unwrap());
+    let html = get_link(&body["HtmlBody"].as_str().unwrap());
+    let plain_text = get_link(&body["TextBody"].as_str().unwrap());
 
     ConfirmationLinks {
       html,

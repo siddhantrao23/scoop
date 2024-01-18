@@ -45,7 +45,7 @@ impl EmailClient {
       html_body,
     };
 
-    let _builder = self
+    self
       .client
       .post(&url)
       .header("X-Postmark-Server-Token", self.auth_token.expose_secret().clone())
@@ -58,6 +58,7 @@ impl EmailClient {
 }
 
 #[derive(serde::Serialize)]
+#[serde(rename_all = "PascalCase")]
 struct SendEmailRequest<'a> {
   from: &'a str,
   to: &'a str,
@@ -70,7 +71,7 @@ struct SendEmailRequest<'a> {
 mod tests {
   use claims::{assert_ok, assert_err};
   use secrecy::Secret;
-use wiremock::{MockServer, Mock, matchers::{header_exists, header, path, method, any}, ResponseTemplate};
+  use wiremock::{MockServer, Mock, matchers::{header_exists, header, path, method, any}, ResponseTemplate};
   use fake::{faker::{internet::en::SafeEmail, lorem::en::{Sentence, Paragraph}}, Fake, Faker};
   use crate::{domain::SubscriberEmail, email_client::EmailClient};
 

@@ -2,6 +2,8 @@ use actix_web::{HttpResponse, web};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::utils::see_other;
+
 #[derive(serde::Deserialize)]
 #[allow(dead_code)]
 pub struct Parameters {
@@ -30,7 +32,7 @@ pub async fn confirm(
       if confirm_subscriber(&pool, id).await.is_err() {
         return HttpResponse::InternalServerError().finish()
       }
-      HttpResponse::Ok().finish()
+      see_other("/subscriptions")
     }
   }
 }

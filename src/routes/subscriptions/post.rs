@@ -1,3 +1,4 @@
+use actix_web_flash_messages::FlashMessage;
 use anyhow::Context;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -7,6 +8,7 @@ use sqlx::{PgPool, Postgres, Transaction};
 use chrono::Utc;
 use uuid::Uuid;
 
+use crate::utils::see_other;
 use crate::{
   domain::{NewSubscriber, SubscriberName, SubscriberEmail}, 
   email_client::EmailClient, startup::ApplicationBaseUrl
@@ -61,13 +63,14 @@ pub async fn subscribe(
   store_token(&mut transaction, subscriber_id, &subscriber_token)
     .await
     .context("Failed to store confirmation token for a new subscriber.")?;
-  transaction.commit()
-    .await
-    .context("Failed to  commit the transaction to database.")?;
   send_confirmation_email(&email_client, new_sub, &base_url.0, &subscriber_token)
     .await
     .context("Failed to send the confirmation email to subscriber.")?;
-  Ok(HttpResponse::Ok().finish())
+  transaction.commit()
+    .await
+    .context("Failed to  commit the transaction to database.")?;
+  FlashMessage::info("Check your email for a verification link!").send();
+  Ok(see_other("/subscriptions"))
 }
 
 #[tracing::instrument(
@@ -85,17 +88,18 @@ pub async fn send_confirmation_email(
     base_url,
     subscription_token,
   );
+  tracing::info!("{base_url}");
   email_client.send_email(
     &new_sub.email,
     "Welcome!", 
     &format!(
-      "Welcome to our newsletter!<br/> Click <a href=\"{}\">here</a> to confirm your subscription.",
+      "Welcome to our newsletter! \n Visit {} to confirm your subscription.",
       confirmation_link
     ),
     &format!(
-      "Welcome to our newsletter! \n Visit {} to confirm your subscription.",
+      "Welcome to our newsletter!<br/> Click <a href=\"{}\">here</a> to confirm your subscription.",
       confirmation_link
-    ),    
+    ),
   ).await
 }
 

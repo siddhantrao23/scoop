@@ -1,9 +1,9 @@
 use wiremock::{Mock, matchers::{path, method}, ResponseTemplate};
 
-use crate::helpers::spawn_app;
+use crate::helpers::{spawn_app, assert_is_redirect_to};
 
 #[tokio::test]
-async fn subscribe_returns_200_for_valid_form_data() {
+async fn subscribe_redirects_for_valid_form_data() {
   let app = spawn_app().await;
   let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
   
@@ -15,7 +15,9 @@ async fn subscribe_returns_200_for_valid_form_data() {
       .await;
   
   let response = app.post_subscriptions(body.into()).await;
-  assert_eq!(200, response.status().as_u16());
+  assert_is_redirect_to(&response, "/subscriptions");
+  let html_body = app.get_subscription_html().await;
+  assert!(html_body.contains("<p><i>Check your email for a verification link!</i></p>"));
 }
 
 #[tokio::test]
@@ -31,7 +33,9 @@ async fn subscribe_persists_new_subscriber() {
       .await;
   
   let response = app.post_subscriptions(body.into()).await;
-  assert_eq!(200, response.status().as_u16());
+  assert_is_redirect_to(&response, "/subscriptions");
+  let html_body = app.get_subscription_html().await;
+  assert!(html_body.contains("<p><i>Check your email for a verification link!</i></p>"));
   
   let saved = sqlx::query!("SELECT email, name, status FROM subscriptions")
           .fetch_one(&app.db_pool)

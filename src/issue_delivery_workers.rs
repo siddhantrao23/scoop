@@ -29,9 +29,9 @@ pub async fn try_execute_task(
     return Ok(ExecutionOutcome::EmptyQueue);
   }
   let (transaction, issue_id, email) = task.unwrap();
-    Span::current()
-    .record("newsletter_issue_id", &display(issue_id))
-    .record("subscriber_email", &display(&email));
+  Span::current()
+  .record("newsletter_issue_id", &display(issue_id))
+  .record("subscriber_email", &display(&email));
   match SubscriberEmail::parse(email.clone()) {
     Ok(email) => {
       let issue = get_issue(pool, issue_id).await?;
@@ -77,7 +77,7 @@ async fn dequeue_task(
     LIMIT 1
     "#
   )
-  .fetch_optional(&mut transaction)
+  .fetch_optional(&mut *transaction)
   .await?;
 
   if let Some(r) = r {
@@ -101,13 +101,13 @@ async fn delete_task(
     r#"
     DELETE FROM newsletter_delivery_queue
     WHERE
-    newsletter_issue_id = $1 AND
-    subscriber_email = $2
+      newsletter_issue_id = $1 AND
+      subscriber_email = $2
     "#,
     issue_id,
     email
   )
-  .execute(&mut transaction)
+  .execute(&mut *transaction)
   .await?;
 
   transaction.commit().await?;
