@@ -3,12 +3,11 @@ use anyhow::Context;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use actix_web::{HttpResponse, web, ResponseError};
-use reqwest::StatusCode;
 use sqlx::{PgPool, Postgres, Transaction};
 use chrono::Utc;
 use uuid::Uuid;
 
-use crate::utils::see_other;
+use crate::utils::{see_other, e500, e400};
 use crate::{
   domain::{NewSubscriber, SubscriberName, SubscriberEmail}, 
   email_client::EmailClient, startup::ApplicationBaseUrl
@@ -51,24 +50,29 @@ pub async fn subscribe(
   pool: web::Data<PgPool>,
   email_client: web::Data<EmailClient>,
   base_url: web::Data<ApplicationBaseUrl>,
-) -> Result<HttpResponse, SubscribeError> {
-  let new_sub = form.0.try_into().map_err(SubscribeError::ValidationError)?;
+) -> Result<HttpResponse, actix_web::Error> {
+  let new_sub = form.0.try_into().map_err(e400)?;
   let mut transaction = pool.begin()
     .await
-    .context("Failed to acquire a Postgres connection from pool")?;
+    .context("Failed to acquire a Postgres connection from pool")
+    .map_err(e500)?;
   let subscriber_id = insert_subscriber(&mut transaction, &new_sub)
     .await
-    .context("Failed to insert new subscriber in database.")?;
+    .context("Failed to insert new subscriber in database.")
+    .map_err(e500)?;
   let subscriber_token = generate_subscription_token();
   store_token(&mut transaction, subscriber_id, &subscriber_token)
     .await
-    .context("Failed to store confirmation token for a new subscriber.")?;
+    .context("Failed to store confirmation token for a new subscriber.")
+    .map_err(e500)?;
   send_confirmation_email(&email_client, new_sub, &base_url.0, &subscriber_token)
     .await
-    .context("Failed to send the confirmation email to subscriber.")?;
+    .context("Failed to send the confirmation email to subscriber.")
+    .map_err(e500)?;
   transaction.commit()
     .await
-    .context("Failed to  commit the transaction to database.")?;
+    .context("Failed to  commit the transaction to database.")
+    .map_err(e500)?;
   FlashMessage::info("Check your email for a verification link!").send();
   Ok(see_other("/subscriptions"))
 }
@@ -88,7 +92,6 @@ pub async fn send_confirmation_email(
     base_url,
     subscription_token,
   );
-  tracing::info!("{base_url}");
   email_client.send_email(
     &new_sub.email,
     "Welcome!", 
@@ -192,26 +195,3 @@ impl std::error::Error for StoreTokenError {
 }
 
 impl ResponseError for StoreTokenError {}
-
-#[derive(thiserror::Error)]
-pub enum SubscribeError {
-  #[error("{0}")]
-  ValidationError(String),
-  #[error(transparent)]
-  UnexpectedError(#[from] anyhow::Error),
-}
-
-impl std::fmt::Debug for SubscribeError {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-  error_chain_fmt(self, f)
-  }
-}
-
-impl ResponseError for SubscribeError {
-  fn status_code(&self) -> StatusCode {
-    match self {
-      SubscribeError::ValidationError(_) => StatusCode::BAD_REQUEST,
-      SubscribeError::UnexpectedError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-    }
-  }
-}
