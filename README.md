@@ -1,6 +1,7 @@
 # scoop
 
 A simple clean newsletter delivery service in rust.
+Built using ["Zero To Production In Rust"](www.zero2prod.com), a book on API development using Rust.
 
 Public Endpoints:
 | Endpoint            |     Method        |
