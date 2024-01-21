@@ -3,16 +3,16 @@
 A simple clean newsletter delivery service in rust.
 
 Public Endpoints:
-- **/**
-- **/health_check**
-- "**/login**
-- **/subscriptions**
-
-- **/admin**
-  - **/dashboard**
-  - **/logout**
-  - **/newsletters**
-  - **/password**
+| Endpoint            |     Method        |
+| --------------------| ----------------- |
+| /                   | **GET**           |
+| /health_check       | **GET**           |
+| /login              | **GET**           |
+| /subscriptions      | **GET**/**POST**  |
+| /admin/dashboard    | **GET**           |
+| /admin/logout       | **POST**          |
+| /admin/newsletters  | **GET**/**POST**  |
+| /admin/password     | **GET**/**POST**  |
 
 # Features
 
