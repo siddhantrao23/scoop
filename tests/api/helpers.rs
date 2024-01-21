@@ -4,7 +4,7 @@ use serde_json::json;
 use sqlx::{PgPool, PgConnection, Connection, Executor};
 use uuid::Uuid;
 use wiremock::MockServer;
-use zero2prod::{
+use scoop::{
   configuration::{get_configuration, DatabaseSettings},
   telemetry::{get_subscriber, init_subscriber},
   startup::{get_connection_pool, Application}, email_client::EmailClient, issue_delivery_workers::{ExecutionOutcome, try_execute_task},

@@ -7,16 +7,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in library 'zero2prod'",
+      "name": "Debug unit tests in library 'scoop'",
       "cargo": {
         "args": [
           "test",
           "--no-run",
           "--lib",
-          "--package=zero2prod"
+          "--package=scoop"
         ],
         "filter": {
-          "name": "zero2prod",
+          "name": "scoop",
           "kind": "lib"
         }
       },
@@ -26,15 +26,15 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug executable 'zero2prod'",
+      "name": "Debug executable 'scoop'",
       "cargo": {
         "args": [
           "build",
-          "--bin=zero2prod",
-          "--package=zero2prod"
+          "--bin=scoop",
+          "--package=scoop"
         ],
         "filter": {
-          "name": "zero2prod",
+          "name": "scoop",
           "kind": "bin"
         }
       },
@@ -44,16 +44,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in executable 'zero2prod'",
+      "name": "Debug unit tests in executable 'scoop'",
       "cargo": {
         "args": [
           "test",
           "--no-run",
-          "--bin=zero2prod",
-          "--package=zero2prod"
+          "--bin=scoop",
+          "--package=scoop"
         ],
         "filter": {
-          "name": "zero2prod",
+          "name": "scoop",
           "kind": "bin"
         }
       },
@@ -69,7 +69,7 @@
           "test",
           "--no-run",
           "--test=api",
-          "--package=zero2prod"
+          "--package=scoop"
         ],
         "filter": {
           "name": "api",

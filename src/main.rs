@@ -1,4 +1,4 @@
-use zero2prod::{
+use scoop::{
   telemetry::{init_subscriber, get_subscriber}, 
   configuration::get_configuration, 
   startup::Application, issue_delivery_workers::run_worker_till_stopped
@@ -9,7 +9,7 @@ use tokio::task::JoinError;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
   let subscriber = get_subscriber(
-      "zero2prod".into(), "info".into(), std::io::stdout
+      "scoop".into(), "info".into(), std::io::stdout
   );
   init_subscriber(subscriber);
 
