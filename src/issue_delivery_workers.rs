@@ -6,7 +6,6 @@ use uuid::Uuid;
 
 use crate::{email_client::EmailClient, domain::SubscriberEmail, configuration::Settings, startup::get_connection_pool};
 
-
 pub enum ExecutionOutcome {
   TaskCompleted,
   EmptyQueue,

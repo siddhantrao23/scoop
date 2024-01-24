@@ -12,4 +12,4 @@ CREATE TABLE idempotency (
   response_body BYTEA NOT NULL,
   created_at timestamptz NOT NULL,
   PRIMARY KEY(user_id, idempotency_key)
-)
+);

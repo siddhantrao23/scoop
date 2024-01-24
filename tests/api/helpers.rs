@@ -1,5 +1,4 @@
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
-use secrecy::ExposeSecret;
 use serde_json::json;
 use sqlx::{PgPool, PgConnection, Connection, Executor};
 use uuid::Uuid;
@@ -290,9 +289,7 @@ pub async fn spawn_app() -> TestApp {
 }
 
 async fn configure_database(configuration: &DatabaseSettings) -> PgPool {
-  let mut connection = PgConnection::connect(
-      &configuration.connection_string_without_db().expose_secret()
-  )
+  let mut connection = PgConnection::connect_with(&configuration.without_db())
   .await
   .expect("Failed to connect to postgres.");
 
@@ -300,7 +297,7 @@ async fn configure_database(configuration: &DatabaseSettings) -> PgPool {
     .await
     .expect("Failed to create test database.");
 
-  let connection_pool = PgPool::connect(&configuration.connection_string().expose_secret())
+  let connection_pool = PgPool::connect_with(configuration.with_db())
     .await
     .expect("Failed to connect to postgres.");
 
