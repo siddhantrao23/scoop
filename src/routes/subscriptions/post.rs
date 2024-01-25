@@ -15,8 +15,8 @@ use crate::{
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
-  email: String,
-  name: String
+  pub email: String,
+  pub name: String
 }
 
 impl TryFrom<FormData> for NewSubscriber {
@@ -92,16 +92,24 @@ pub async fn send_confirmation_email(
     base_url,
     subscription_token,
   );
+  let unsubscription_link = format!(
+    "{}/unsubscribe?subscription_token={}",
+    base_url,
+    subscription_token,
+  );
   email_client.send_email(
     &new_sub.email,
     "Welcome!", 
     &format!(
-      "Welcome to our newsletter! \n Visit {} to confirm your subscription.",
-      confirmation_link
+      "Welcome to our newsletter! \n Visit {} to confirm your subscription. Visit {} to unsubscribe.",
+      confirmation_link,
+      unsubscription_link
     ),
     &format!(
-      "Welcome to our newsletter!<br/> Click <a href=\"{}\">here</a> to confirm your subscription.",
-      confirmation_link
+      "Welcome to our newsletter!<br/> Click <a href=\"{}\">here</a> to confirm your subscription.\
+      Click <a href=\"{}\">here</a> to unsubscribe.",
+      confirmation_link,
+      unsubscription_link
     ),
   ).await
 }

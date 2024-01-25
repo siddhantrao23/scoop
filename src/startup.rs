@@ -16,7 +16,7 @@ use tracing_actix_web::TracingLogger;
 
 use crate::authentication::reject_anonymous_users;
 use crate::configuration::{Settings, DatabaseSettings};
-use crate::routes::{home, login_form, login, admin_dashboard, change_password_form, change_password, log_out, publish_newsletter, newsletter_form, subscribe_form};
+use crate::routes::{admin_dashboard, change_password, change_password_form, home, log_out, login, login_form, newsletter_form, publish_newsletter, subscribe_form, unsubscribe};
 use crate::email_client::EmailClient;
 use crate::routes::{health_check, subscribe, confirm};
 
@@ -94,6 +94,7 @@ async fn run(
           .route("/subscriptions", web::get().to(subscribe_form))
           .route("/subscriptions", web::post().to(subscribe))
           .route("/subscriptions/confirm", web::get().to(confirm))
+          .route("/unsubscribe", web::get().to(unsubscribe))
           .service(
             web::scope("/admin")
               .wrap(from_fn(reject_anonymous_users))

@@ -7,7 +7,7 @@ use crate::utils::see_other;
 #[derive(serde::Deserialize)]
 #[allow(dead_code)]
 pub struct Parameters {
-  subscription_token: String
+  pub subscription_token: String
 }
 
 #[tracing::instrument(
@@ -41,7 +41,7 @@ pub async fn confirm(
   name = "Get subscriber_id from token",
   skip(pool, subcription_token)
 )]
-async fn get_subscriber_id_from_token(
+pub async fn get_subscriber_id_from_token(
   pool: &PgPool,
   subcription_token: &str
 ) -> Result<Option<Uuid>, sqlx::Error> {
