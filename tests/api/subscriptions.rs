@@ -17,7 +17,7 @@ async fn subscribe_redirects_for_valid_form_data() {
   let response = app.post_subscriptions(body.into()).await;
   assert_is_redirect_to(&response, "/subscriptions");
   let html_body = app.get_subscription_html().await;
-  assert!(html_body.contains("<p><i>Check your email for a verification link!</i></p>"));
+  assert!(html_body.contains("Check your email for a verification link!"));
 }
 
 #[tokio::test]
@@ -35,7 +35,7 @@ async fn subscribe_persists_new_subscriber() {
   let response = app.post_subscriptions(body.into()).await;
   assert_is_redirect_to(&response, "/subscriptions");
   let html_body = app.get_subscription_html().await;
-  assert!(html_body.contains("<p><i>Check your email for a verification link!</i></p>"));
+  assert!(html_body.contains("Check your email for a verification link!"));
   
   let saved = sqlx::query!("SELECT email, name, status FROM subscriptions")
           .fetch_one(&app.db_pool)

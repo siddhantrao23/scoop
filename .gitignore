@@ -1,2 +1,4 @@
 /target
 /.vscode
+secrets.txt
+configuration/production.yaml

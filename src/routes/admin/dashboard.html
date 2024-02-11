@@ -6,7 +6,7 @@
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon" /> 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Login</title>
+    <title>Admin Dashboard</title>
   </head>
   <body>
     <!-- Bootstrap Navbar -->
@@ -18,7 +18,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto passive">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/login">Login</a>
+                    <a class="nav-link passive" href="#about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link passive" href="/login">Login</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link passive" href="/subscriptions">Subscribe</a>
@@ -27,22 +30,38 @@
         </div>
     </nav>
 
-    {}
-    
-    <!-- Login Form -->
-    <div class="container form-container">
-        <h2 class="text-center mb-4">Login to Scoop</h2>
-        <form action="/login" method="post">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" name="username" placeholder="Enter your username">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" name="password" placeholder="Enter your password">
-            </div>
-            <button type="submit" class="btn btn-block">Login</button>
-        </form>
+    <div class="container dashboard-container">
+      <h2 class="text-center mb-4">Admin Dashboard</h2>
+      <p>Welcome {}!</p>
+      <p>Available actions:</p>
+      <ul class="actions-list">
+        <li>
+          <a href="/admin/newsletters">
+            <button class="btn btn-block logout-btn">
+              Send Newsletters
+            </button>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/subscribers">
+            <button class="btn btn-block logout-btn">
+              Manage Subscribers
+            </button>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/password">
+            <button class="btn btn-block logout-btn">
+              Change Password
+            </button>
+          </a>
+        </li>
+        <li>
+            <form action="/admin/logout" method="post">
+                <button type="submit" class="btn btn-danger btn-block logout-btn">Logout</button>
+            </form>
+        </li>
+      </ul>
     </div>
   </body>
 </html>

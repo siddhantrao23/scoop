@@ -47,9 +47,7 @@ async fn both_passwords_must_match() {
   assert_is_redirect_to(&response, "/admin/password");
   
   let html_page = app.get_change_password_html().await;
-  assert!(html_page.contains(
-    "<p><i>You entered two different new passwords - the field values must match.</i></p>"
-  ));
+  assert!(html_page.contains("You entered two different new passwords - the field values must match"));
 }
 
 #[tokio::test]
@@ -72,9 +70,7 @@ async fn current_passwords_must_be_valid() {
   assert_is_redirect_to(&response, "/admin/password");
   
   let html_page = app.get_change_password_html().await;
-  assert!(html_page.contains(
-    "<p><i>The current password is incorrect.</i></p>"
-  ));
+  assert!(html_page.contains("The current password is incorrect."));
 }
 
 #[tokio::test]
@@ -96,9 +92,7 @@ async fn new_password_must_be_strong() {
   assert_is_redirect_to(&response, "/admin/password");
   
   let html_page = app.get_change_password_html().await;
-  assert!(html_page.contains(
-    "<p><i>The password should be at least 12 characters long.</i></p>"
-  ));
+  assert!(html_page.contains("The password should be at least 12 characters long."));
 }
 
 #[tokio::test]
@@ -118,12 +112,12 @@ async fn changing_password_is_successful() {
   .await;
   assert_is_redirect_to(&response, "/admin/password");
   let html_page = app.get_change_password_html().await;
-  assert!(html_page.contains("<p><i>Your password has been changed.</i></p>"));
+  assert!(html_page.contains("Your password has been changed."));
 
   let response = app.post_logout().await;
   assert_is_redirect_to(&response, "/login");  
   let html_page = app.get_login_html().await;
-  assert!(html_page.contains("<p><i>You have successfully logged out.</i></p>"));
+  assert!(html_page.contains("You have successfully logged out."));
 
   let response = app.post_login(&json!({
     "username": &app.test_user.username,

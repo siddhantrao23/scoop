@@ -6,7 +6,7 @@
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon" /> 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Login</title>
+    <title>Submit Newsletter</title>
   </head>
   <body>
     <!-- Bootstrap Navbar -->
@@ -18,31 +18,36 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto passive">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/login">Login</a>
+                    <a class="nav-link passive" href="/login">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link passive" href="/subscriptions">Subscribe</a>
+                    <a class="nav-link active" href="/subscribe">Subscribe</a>
                 </li>
             </ul>
         </div>
     </nav>
 
     {}
-    
-    <!-- Login Form -->
-    <div class="container form-container">
-        <h2 class="text-center mb-4">Login to Scoop</h2>
-        <form action="/login" method="post">
+
+   <!-- Newsletter Editor Form Container -->
+    <div class="container form-container-wide">
+        <h2 class="text-center mb-4">Newsletter Editor</h2>
+        <form>
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" name="username" placeholder="Enter your username">
+                <label for="title">Title</label>
+                <input type="text" class="form-control" name="title" placeholder="Enter the newsletter title">
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" name="password" placeholder="Enter your password">
+                <label for="textArea">Text Content</label>
+                <textarea class="form-control" name="text_content" rows="10" placeholder="Enter the text content"></textarea>
             </div>
-            <button type="submit" class="btn btn-block">Login</button>
+            <div class="form-group">
+                <label for="htmlArea">HTML Content</label>
+                <textarea class="form-control" name="html_content" rows="10" placeholder="Enter the HTML content"></textarea>
+            </div>
+            <input hidden type="text" name="idempotency_key" value="{}">
+            <button type="submit" class="btn btn-block">Submit Newsletter</button>
         </form>
-    </div>
+    </div> 
   </body>
 </html>

@@ -14,52 +14,18 @@ pub async fn newsletter_form(
 
   let mut msg_html = String::new();
   for m in flash_messages.iter() {
-    writeln!(msg_html, "<p><i>{}</i></p>", m.content()).unwrap();
+    writeln!(msg_html,
+      r#"
+      <div class="alert alert-info">
+      <strong>Info!</strong> {}
+      </div>
+      "#,
+      m.content()
+    ).unwrap();
   }
   let idempotency_key = uuid::Uuid::new_v4();
   Ok(HttpResponse::Ok()
     .content_type(ContentType::html())
-    .body(format!(
-      r#"<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <title>Submit Newsletter</title>
-</head>
-<body>
-  {msg_html}
-  <form action="/admin/newsletters" method="post">
-    <label>Title
-    <input
-      type="text"
-      placeholder="Enter newsletter title"
-      name="title"
-    >
-    </label>
-    <br>
-    <label>Plain Text Content
-    <textarea
-      placeholder="Enter the content in plain text"
-      name="text_content"
-      rows="20"
-      cols="50"
-    ></textarea>
-    </label>
-    <br>
-    <label>HTML Content
-    <textarea
-      placeholder="Enter the content in HTML format"
-      name="html_content"
-      rows="20"
-      cols="50"
-    ></textarea>
-    </label>
-    <br>
-    <input hidden type="text" name="idempotency_key" value="{idempotency_key}">
-    <button type="submit">Publish Newsletter</button>
-  </form>
-  <p><a href="/admin/dashboard">&lt;- Back</a></p>
-</body>
-</html>"#,
-  )))
+    .body(format!(include_str!("newsletter.html"), msg_html, idempotency_key))
+  )
 }

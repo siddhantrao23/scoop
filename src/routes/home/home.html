@@ -1,13 +1,65 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/custom.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" /> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Home page</title>
   </head>
   <body>
-    <h1>Home</h1>
-    <p>Welcome to our newsletter.</p>
-    <a href="/login">Login</a>
-    <a href="/subscriptions">Subscribe to the newsletter</a>
+    <!-- Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand passive" href="/">scoop</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto passive">
+                <li class="nav-item">
+                    <a class="nav-link passive" href="#about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link passive" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link passive" href="/subscriptions">Subscribe</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Jumbotron with Ice Cream Scoop Image -->
+        <div class="jumbotron text-center">
+            <img src="/static/scoop.png" alt="Ice Cream Scoop" class="img-fluid mb-4" style="max-width: 300px;">
+            <h1 class="display-4">Welcome to Scoop</h1>
+            <p class="lead">Your source for delicious news and updates!</p>
+        </div>
+
+        <!-- About Section -->
+        <section id="about" class="about-section mb-4 margins">
+            <h2>About Us</h2>
+            <p>Welcome to Scoop, your premier destination for managing and delivering delicious newsletters! At Scoop, we want to simplify the process of connecting with your audience through delightful and engaging content.</p>
+
+            <p>Our platform is designed with you in mind, whether you're a content creator, business owner, or anyone looking to reach subscribers in a personalized way. With Scoop, you can effortlessly create and send newsletters that leave a lasting impression.</p>
+
+            <p>Key Features:
+            <ul>
+                <li>Manage Subscribers: Easily organize and maintain your subscriber list.</li>
+                <li>Create Engaging Content: Craft newsletters with our user-friendly editor.</li>
+                <li>Asynchronous Delivery through PostMark.</li>
+                <li>Secure Email Delivery: Your newsletters will always reach your audience.</li>
+            </ul>
+            </p>
+
+            <p>Join us on a journey of simplifying newsletter management. Whether you're a seasoned marketer or just starting, Scoop is here to empower you in building meaningful connections with your subscribers. Your success is our priority, and we're excited to be part of your newsletter journey.</p>
+
+            <p>Thank you for choosing Scoop, where newsletters become a breeze!</p>
+            <i class="small-text">Everyone say thank you ChatGPT!!</i>
+        </section>
+    </div>
   </body>
 </html>

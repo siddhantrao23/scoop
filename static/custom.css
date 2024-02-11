@@ -1,0 +1,96 @@
+:root {
+    --primary-color: #f5b0f5;
+    --light-color: #fafaaf;
+    --success-color: #79ff98;
+    --info-color: #baffc2;
+}
+
+/* Body background color */
+body {
+    background-color: var(--light-color);
+}
+
+/* Navbar styles */
+.navbar {
+    background-color: var(--primary-color);
+}
+
+.passive {
+    color: #7c577e !important; /* White text for better contrast */
+}
+
+.active {
+  color: #ffffff !important;
+}
+
+/* Jumbotron styles */
+.jumbotron {
+    background-color: var(--light-color);
+}
+
+/* Section background colors */
+.about-section {
+    background-color: var(--info-color);
+}
+
+.margins {
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.small-text {
+  font-size: smaller;
+}
+
+.form-container {
+  max-width: 400px;
+  margin: auto;
+  margin-top: 100px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container-wide {
+  max-width: 700px;
+  margin: auto;
+  margin-top: 100px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+  background-color: #f5b0f5;
+  color: #7c577e;
+}
+
+.dashboard-container {
+  max-width: 700px;
+  margin: auto;
+  margin-top: 100px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.actions-list {
+  list-style: none;
+  padding: 0;
+}
+
+.actions-list li {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.logout-btn {
+  color: #fff;
+  background-color: #e95be6; /* Bootstrap danger color */
+  border: none;
+}

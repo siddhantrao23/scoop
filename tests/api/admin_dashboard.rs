@@ -23,7 +23,7 @@ async fn logout_clears_session_state() {
   assert_is_redirect_to(&response, "/login");
 
   let html_body = app.get_login_html().await;
-  assert!(html_body.contains(r#"<p><i>You have successfully logged out.</i></p>"#));
+  assert!(html_body.contains("You have successfully logged out."));
 
   let response = app.get_admin_dashboard().await;
   assert_is_redirect_to(&response, "/login");

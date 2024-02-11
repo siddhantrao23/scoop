@@ -6,7 +6,7 @@
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon" /> 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Login</title>
+    <title>Subscribe</title>
   </head>
   <body>
     <!-- Bootstrap Navbar -->
@@ -18,30 +18,30 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto passive">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/login">Login</a>
+                    <a class="nav-link passive" href="/login">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link passive" href="/subscriptions">Subscribe</a>
+                    <a class="nav-link active" href="/subscribe">Subscribe</a>
                 </li>
             </ul>
         </div>
     </nav>
 
     {}
-    
-    <!-- Login Form -->
+
+    <!-- Subscribe Form -->
     <div class="container form-container">
-        <h2 class="text-center mb-4">Login to Scoop</h2>
-        <form action="/login" method="post">
+        <h2 class="text-center mb-4">Subscribe to the Newsletter</h2>
+        <form action="/subscriptions" method="post">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" name="username" placeholder="Enter your username">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" name="name" placeholder="Enter your name">
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" name="password" placeholder="Enter your password">
+                <label for="email">Email</label>
+                <input type="text" class="form-control" name="email" placeholder="Enter your email">
             </div>
-            <button type="submit" class="btn btn-block">Login</button>
+            <button type="submit" class="btn btn-block">Subscribe</button>
         </form>
     </div>
   </body>

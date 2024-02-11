@@ -12,7 +12,6 @@ path = "src/main.rs"
 name = "scoop"
 
 [dependencies]
-actix-web = "4.3.1"
 serde = { version = "1.0.164", features = ["derive"] }
 tokio = { version = "1.28.2", features = ["rt-multi-thread", "macros"] }  
 config = "0.13.3"
@@ -38,6 +37,10 @@ argon2 = {version = "0.5.2", features=["std"]}
 actix-web-flash-messages = { version = "0.4.2", features = ["cookies"] }
 actix-session = { version = "0.8.0", features = ["redis-rs-tls-session"] }
 actix-web-lab = "0.20.1"
+actix-web = "4.4.1"
+actix-web-static-files = "4.0"
+static-files = "0.2.1"
+actix-files = "0.6.5"
 
 [dependencies.reqwest]
 version = "0.11.18"
@@ -63,3 +66,6 @@ tokio = { version = "1", features = ["rt", "macros"] }
 wiremock = "0.5"
 linkify = "0.9"
 serde_urlencoded = "0.7.1"
+
+[build-dependencies]
+static-files = "0.2.1"

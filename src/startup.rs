@@ -9,6 +9,7 @@ use actix_web_flash_messages::FlashMessagesFramework;
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_session::SessionMiddleware;
 use actix_web_lab::middleware::from_fn;
+use actix_files as fs;
 use secrecy::{ExposeSecret, Secret};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
@@ -105,6 +106,8 @@ async fn run(
               .route("/newsletters", web::get().to(newsletter_form))
               .route("/newsletters", web::post().to(publish_newsletter))
           )
+          .service(fs::Files::new("/static", "./static").show_files_listing())
+          .service(fs::Files::new("/admin/static", "./static").show_files_listing())
           .app_data(db_pool.clone())
           .app_data(email_client.clone())
           .app_data(base_url.clone())
