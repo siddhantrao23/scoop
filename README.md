@@ -1,6 +1,6 @@
 # scoop
 
-A simple clean newsletter delivery service in rust.
+A simple clean newsletter delivery service in Rust.
 Done as a part of reading ["Zero To Production In Rust"](www.zero2prod.com), a book on API development using Rust.
 
 Public Endpoints:
@@ -45,6 +45,9 @@ cargo build
 docker build ./
 ```
 
+# ToDo
+- fix broken css rendering and file serving
+- 
 # Testing
 
 ```sh
